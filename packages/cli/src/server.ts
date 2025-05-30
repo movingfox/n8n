@@ -1,4 +1,4 @@
-import { inDevelopment, inProduction } from '@n8n/backend-common';
+import { inDevelopment, inProduction, LicenseState } from '@n8n/backend-common';
 import { SecurityConfig } from '@n8n/config';
 import { Container, Service } from '@n8n/di';
 import cookieParser from 'cookie-parser';
@@ -76,6 +76,7 @@ export class Server extends AbstractServer {
 		private readonly postHogClient: PostHogClient,
 		private readonly eventService: EventService,
 		private readonly instanceSettings: InstanceSettings,
+		private readonly licenseState: LicenseState,
 	) {
 		super();
 
@@ -147,6 +148,16 @@ export class Server extends AbstractServer {
 			await import('@/sso.ee/saml/routes/saml.controller.ee');
 		} catch (error) {
 			this.logger.warn(`SAML initialization failed: ${(error as Error).message}`);
+		}
+
+		// ----------------------------------------
+		// OIDC
+		// ----------------------------------------
+
+		if (this.licenseState.isOidcLicensed()) {
+			const { OidcService } = await import('@/sso.ee/oidc/oidc.service.ee');
+			await Container.get(OidcService).init();
+			await import('@/sso.ee/oidc/routes/oidc.controller.ee');
 		}
 
 		// ----------------------------------------

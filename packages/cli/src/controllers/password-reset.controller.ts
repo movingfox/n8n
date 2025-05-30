@@ -3,6 +3,7 @@ import {
 	ForgotPasswordRequestDto,
 	ResolvePasswordTokenQueryDto,
 } from '@n8n/api-types';
+import { LicenseState } from '@n8n/backend-common';
 import { UserRepository } from '@n8n/db';
 import { Body, Get, Post, Query, RestController } from '@n8n/decorators';
 import { hasGlobalScope } from '@n8n/permissions';
@@ -39,6 +40,7 @@ export class PasswordResetController {
 		private readonly passwordUtility: PasswordUtility,
 		private readonly userRepository: UserRepository,
 		private readonly eventService: EventService,
+		private readonly licenseState: LicenseState,
 	) {}
 
 	/**
@@ -101,6 +103,12 @@ export class PasswordResetController {
 
 		if (this.license.isLdapEnabled() && ldapIdentity) {
 			throw new UnprocessableRequestError('forgotPassword.ldapUserPasswordResetUnavailable');
+		}
+
+		const oidcIdentity = user.authIdentities?.find((i) => i.providerType === 'oidc');
+
+		if (this.licenseState.isOidcLicensed() && oidcIdentity) {
+			throw new UnprocessableRequestError('forgotPassword.oidcUserPasswordResetUnavailable');
 		}
 
 		const url = this.authService.generatePasswordResetUrl(user);
