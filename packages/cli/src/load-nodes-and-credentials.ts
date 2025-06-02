@@ -88,13 +88,11 @@ export class LoadNodesAndCredentials {
 			await this.loadNodesFromNodeModules(nodeModulesDir, '@n8n/n8n-nodes-langchain');
 		}
 
-		if (!this.globalConfig.nodes.communityPackages.preventLoading) {
-			// Load nodes from any other `n8n-nodes-*` packages in the download directory
-			// This includes the community nodes
-			await this.loadNodesFromNodeModules(
-				path.join(this.instanceSettings.nodesDownloadDir, 'node_modules'),
-			);
-		}
+		// Load nodes from any other `n8n-nodes-*` packages in the download directory
+		// This includes the community nodes
+		await this.loadNodesFromNodeModules(
+			path.join(this.instanceSettings.nodesDownloadDir, 'node_modules'),
+		);
 
 		await this.loadNodesFromCustomDirectories();
 		await this.postProcessLoaders();

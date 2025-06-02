@@ -66,8 +66,6 @@ export class Start extends BaseCommand {
 
 	protected server = Container.get(Server);
 
-	override needsCommunityPackages = true;
-
 	override needsTaskRunner = true;
 
 	private getEditorUrl = () => Container.get(UrlService).getInstanceBaseUrl();
@@ -181,21 +179,7 @@ export class Start extends BaseCommand {
 			scopedLogger.debug(`Host ID: ${this.instanceSettings.hostId}`);
 		}
 
-		const { flags } = await this.parse(Start);
-		const { communityPackages } = this.globalConfig.nodes;
-		// cli flag overrides the config env variable
-		if (flags.reinstallMissingPackages) {
-			if (communityPackages.enabled) {
-				this.logger.warn(
-					'`--reinstallMissingPackages` is deprecated: Please use the env variable `N8N_REINSTALL_MISSING_PACKAGES` instead',
-				);
-				communityPackages.reinstallMissing = true;
-			} else {
-				this.logger.warn(
-					'`--reinstallMissingPackages` was passed, but community packages are disabled',
-				);
-			}
-		}
+		// TODO: reimplement reinstalling in the module
 
 		await super.init();
 		this.activeWorkflowManager = Container.get(ActiveWorkflowManager);

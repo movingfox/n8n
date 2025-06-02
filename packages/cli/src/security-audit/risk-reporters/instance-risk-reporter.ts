@@ -89,7 +89,7 @@ export class InstanceRiskReporter implements RiskReporter {
 		const settings: Record<string, unknown> = {};
 
 		settings.features = {
-			communityPackagesEnabled: this.globalConfig.nodes.communityPackages.enabled,
+			// communityPackagesEnabled: this.globalConfig.nodes.communityPackages.enabled,
 			versionNotificationsEnabled: this.globalConfig.versionNotifications.enabled,
 			templatesEnabled: this.globalConfig.templates.enabled,
 			publicApiEnabled: isApiEnabled(),

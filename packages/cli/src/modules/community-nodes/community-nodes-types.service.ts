@@ -4,8 +4,9 @@ import { GlobalConfig } from '@n8n/config';
 import { Service } from '@n8n/di';
 import { ensureError, type INodeTypeDescription } from 'n8n-workflow';
 
-import { CommunityPackagesService } from './community-packages.service';
-import { getCommunityNodeTypes } from '../utils/community-node-types-utils';
+import { CommunityNodesPackagesService } from './community-nodes-packages.service';
+import { getCommunityNodeTypes } from './community-nodes-types-utils';
+import { CommunityNodesConfig } from './community-nodes.config';
 
 const UPDATE_INTERVAL = 8 * 60 * 60 * 1000;
 
@@ -28,24 +29,22 @@ export type StrapiCommunityNodeType = {
 };
 
 @Service()
-export class CommunityNodeTypesService {
+export class CommunityNodesTypesService {
 	private communityNodeTypes: Map<string, StrapiCommunityNodeType> = new Map();
 
 	private lastUpdateTimestamp = 0;
 
 	constructor(
 		private readonly logger: Logger,
-		private globalConfig: GlobalConfig,
-		private communityPackagesService: CommunityPackagesService,
+		private readonly config: CommunityNodesConfig,
+		private readonly globalConfig: GlobalConfig,
+		private readonly packagesService: CommunityNodesPackagesService,
 	) {}
 
 	private async fetchNodeTypes() {
 		try {
 			let data: StrapiCommunityNodeType[] = [];
-			if (
-				this.globalConfig.nodes.communityPackages.enabled &&
-				this.globalConfig.nodes.communityPackages.verifiedEnabled
-			) {
+			if (this.config.enabled && this.config.verifiedEnabled) {
 				const environment = this.globalConfig.license.tenantId === 1 ? 'production' : 'staging';
 				data = await getCommunityNodeTypes(environment);
 			}
@@ -76,7 +75,7 @@ export class CommunityNodeTypesService {
 	}
 
 	private async createIsInstalled() {
-		const installedPackages = (await this.communityPackagesService.getAllInstalledPackages()) ?? [];
+		const installedPackages = (await this.packagesService.getAllInstalledPackages()) ?? [];
 		const installedPackageNames = new Set(installedPackages.map((p) => p.packageName));
 
 		return (nodeTypeName: string) => installedPackageNames.has(nodeTypeName.split('.')[0]);
