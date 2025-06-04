@@ -11,9 +11,9 @@ import {
 import type { z } from 'zod';
 
 import {
+	buildJsonSchemaExampleNotice,
 	inputSchemaField,
 	jsonSchemaExampleField,
-	jsonSchemaPropertiesOptionalityField,
 	schemaTypeField,
 } from '@utils/descriptions';
 import { N8nStructuredOutputParser } from '@utils/output_parsers/N8nOutputParser';
@@ -63,16 +63,11 @@ export class OutputParserStructured implements INodeType {
 	"cities": ["Los Angeles", "San Francisco", "San Diego"]
 }`,
 			},
-			{
-				...jsonSchemaPropertiesOptionalityField,
-				displayOptions: {
-					...jsonSchemaPropertiesOptionalityField.displayOptions,
-					show: {
-						...jsonSchemaPropertiesOptionalityField.displayOptions?.show,
-						'@version': [{ _cnd: { gte: 1.3 } }],
-					},
+			buildJsonSchemaExampleNotice({
+				showExtraProps: {
+					'@version': [{ _cnd: { gte: 1.3 } }],
 				},
-			},
+			}),
 			{
 				...inputSchemaField,
 				default: `{
@@ -141,9 +136,8 @@ export class OutputParserStructured implements INodeType {
 		const jsonExample = this.getNodeParameter('jsonSchemaExample', itemIndex, '') as string;
 		let inputSchema: string;
 
-		const jsonExampleAllFieldsRequired =
-			this.getNode().typeVersion >= 1.3 &&
-			this.getNodeParameter('exampleFieldsOptionality', itemIndex, 'required') === 'required';
+		// Enforce all fields to be required in the generated schema if the node version is 1.3 or higher
+		const jsonExampleAllFieldsRequired = this.getNode().typeVersion >= 1.3;
 
 		if (this.getNode().typeVersion <= 1.1) {
 			inputSchema = this.getNodeParameter('jsonSchema', itemIndex, '') as string;
