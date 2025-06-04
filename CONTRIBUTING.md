@@ -74,7 +74,7 @@ If you already have VS Code and Docker installed, you can click [here](https://v
 
 #### Node.js
 
-[Node.js](https://nodejs.org/en/) version 20.15 or newer is required for development purposes.
+[Node.js](https://nodejs.org/en/) version 20.16 or newer is required for development purposes.
 
 #### pnpm
 
